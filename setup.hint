@@ -1,0 +1,5 @@
+category: Audio
+requires: cygwin libtunepimp3 libreadline6 faad2 libFLAC7 libmad libogg0 libvorbis0 libvorbisfile3 taglib zlib
+sdesc: "MusicBrainz tagging library (apps and plugins)"
+ldesc: "The TunePimp library is a development library geared towards
+developers who wish to create MusicBrainz enabled tagging applications."

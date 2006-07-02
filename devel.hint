@@ -1,0 +1,6 @@
+category: Audio Libs
+requires: cygwin libiconv libmusicbrainz
+external-source: libtunepimp
+sdesc: "MusicBrainz tagging library (development)"
+ldesc: "The TunePimp library is a development library geared towards
+developers who wish to create MusicBrainz enabled tagging applications."
