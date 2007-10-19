@@ -1,5 +1,5 @@
 category: Audio Libs
-requires: cygwin expat libcurl3 libiconv2 libofa0
+requires: cygwin libcurl4 libexpat0 libiconv2 libofa0 libFLAC8 libmad libmpcdec5 libogg0 libvorbis0 libvorbisfile3 taglib zlib
 external-source: libtunepimp
 sdesc: "MusicBrainz tagging library (runtime)"
 ldesc: "The TunePimp library is a development library geared towards
