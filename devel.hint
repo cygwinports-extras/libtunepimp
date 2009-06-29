@@ -1,5 +1,5 @@
 category: Audio Libs
-requires: cygwin libexpat-devel curl-devel libiconv libmusicbrainz libofa-devel
+requires: libexpat-devel curl-devel libiconv libmusicbrainz libofa-devel
 external-source: libtunepimp
 sdesc: "MusicBrainz tagging library (development)"
 ldesc: "The TunePimp library is a development library geared towards
