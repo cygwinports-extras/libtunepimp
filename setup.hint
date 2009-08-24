@@ -1,5 +1,5 @@
 category: Audio
-requires: libtunepimp5 libmusicbrainz4
+requires: libgcc1 libtunepimp5 libmusicbrainz4
 sdesc: "MusicBrainz tagging library (utilities)"
 ldesc: "The TunePimp library is a development library geared towards
 developers who wish to create MusicBrainz enabled tagging applications."

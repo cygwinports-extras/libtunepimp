@@ -1,0 +1,298 @@
+--- origsrc/libtunepimp-0.5.3/configure.in	2008-06-16 01:07:55.078125000 -0500
++++ src/libtunepimp-0.5.3/configure.in	2008-06-16 01:08:07.312500000 -0500
+@@ -30,6 +30,12 @@
+ AM_CONDITIONAL(DARWIN, test x$os = xdarwin)
+ AM_CONDITIONAL(FREEBSD, test x$os = xfreebsd)
+ 
++case "$host_os" in
++  cygwin*|os2*)  SOEXT=".dll" ;;
++  *)             SOEXT=".so"  ;;
++esac
++AC_SUBST(SOEXT)
++
+ dnl Checks for programs.
+ AC_PREREQ(2.52)
+ AC_PROG_CC
+--- origsrc/libtunepimp-0.5.3/examples/Makefile.am	2006-11-18 04:52:35.000000000 -0600
++++ src/libtunepimp-0.5.3/examples/Makefile.am	2008-06-16 01:08:07.312500000 -0500
+@@ -25,4 +25,4 @@
+ bin_PROGRAMS = puid
+ 
+ puid_SOURCES = puid.c
+-puid_LDADD = $(top_builddir)/lib/libtunepimp.la 
++puid_LDADD = $(top_builddir)/lib/libtunepimp.la -lmusicbrainz
+--- origsrc/libtunepimp-0.5.3/lib/Makefile.am	2006-11-28 14:34:02.000000000 -0600
++++ src/libtunepimp-0.5.3/lib/Makefile.am	2008-06-16 01:08:07.312500000 -0500
+@@ -24,7 +24,7 @@
+ 
+ SUBDIRS = utf8 threads
+ 
+-INCLUDES = -I$(top_srcdir)/include/tunepimp-0.5 -Ithreads/posix
++INCLUDES = -I$(top_srcdir)/include/tunepimp-0.5 -I$(srcdir)/threads/posix
+ lib_LTLIBRARIES = libtunepimp.la
+ 
+ libtunepimp_la_SOURCES = tunepimp.cpp filecache.cpp analyzer.cpp dirsearch.cpp metadata.cpp astrcmp.c track.cpp write.cpp c_wrapper.cpp watchdog.cpp plugins.cpp readmeta.cpp fileio.cpp protocol.cpp
+@@ -56,7 +56,7 @@
+ #  4:0:0 - TunePimp implementation for alpha releases of version 0.5.0
+ #  5:0:0 - TunePimp implementation for version 0.5.0
+ #  5:1:0 - TunePimp implementation for version 0.5.1
+-libtunepimp_la_LDFLAGS = -version-info 5:3:0
++libtunepimp_la_LDFLAGS = -version-info 5:3:0 -no-undefined
+ libtunepimp_la_LIBADD = threads/posix/libtpthread.la utf8/libutf8.la $(LIBLTDL) -lm
+ 
+ noinst_LTLIBRARIES = libpluginsupport.la
+--- origsrc/libtunepimp-0.5.3/plugins/flac/Makefile.am	2006-11-18 04:51:35.000000000 -0600
++++ src/libtunepimp-0.5.3/plugins/flac/Makefile.am	2008-06-16 01:08:07.328125000 -0500
+@@ -26,15 +26,15 @@
+ 
+ lib_LTLIBRARIES = flac.la
+ flac_la_SOURCES = flac.cpp flacdecode.cpp flacdecode.h flac_meta.cpp flac_meta.h
+-flac_la_LDFLAGS = -module -avoid-version
+-flac_la_LIBADD = ../../lib/utf8/libutf8.la ../../lib/libpluginsupport.la -lFLAC -lmusicbrainz
++flac_la_LDFLAGS = -module -avoid-version -no-undefined
++flac_la_LIBADD = ../../lib/libpluginsupport.la ../../lib/libtunepimp.la -lFLAC -lmusicbrainz
+ 
+ all:
+-	mkdir -p $(top_srcdir)/examples/plugins
+-	rm -f $(top_srcdir)/examples/plugins/flac.tpp
+-	ln -s ../../plugins/flac/.libs/flac.so $(top_srcdir)/examples/plugins/flac.tpp
++	mkdir -p $(top_builddir)/examples/plugins
++	rm -f $(top_builddir)/examples/plugins/flac.tpp
++	ln -s ../../plugins/flac/.libs/flac$(SOEXT) $(top_builddir)/examples/plugins/flac.tpp
+ 
+ install-exec-am:
+ 
+ clean distclean:
+-	rm -f $(top_srcdir)/examples/plugins/flac.tpp
++	rm -f $(top_builddir)/examples/plugins/flac.tpp
+--- origsrc/libtunepimp-0.5.3/plugins/mp3/Makefile.am	2006-11-18 04:51:07.000000000 -0600
++++ src/libtunepimp-0.5.3/plugins/mp3/Makefile.am	2008-06-16 01:08:07.328125000 -0500
+@@ -28,17 +28,17 @@
+ 
+ lib_LTLIBRARIES = mp3.la
+ mp3_la_SOURCES = mp3.cpp mp3decode.cpp mp3decode.h id3_meta.cpp id3_2_3_meta.cpp mp3info.cpp
+-mp3_la_LDFLAGS = -module -avoid-version
+-mp3_la_LIBADD = ../../lib/utf8/libutf8.la id3tag/libid3tag.la id3tag-2.3/libid3tag23.la ../../lib/libpluginsupport.la -lmad -lmusicbrainz
++mp3_la_LDFLAGS = -module -avoid-version -no-undefined
++mp3_la_LIBADD = id3tag/libid3tag.la id3tag-2.3/libid3tag23.la ../../lib/libpluginsupport.la ../../lib/libtunepimp.la -lmad -lmusicbrainz -lz
+ 
+ noinst_HEADERS = mp3decode.h id3_meta.h mp3info.h id3_2_3_meta.h mp3.h
+ 
+ all:
+-	mkdir -p $(top_srcdir)/examples/plugins
+-	rm -f $(top_srcdir)/examples/plugins/mp3.tpp
+-	ln -s ../../plugins/mp3/.libs/mp3.so $(top_srcdir)/examples/plugins/mp3.tpp
++	mkdir -p $(top_builddir)/examples/plugins
++	rm -f $(top_builddir)/examples/plugins/mp3.tpp
++	ln -s ../../plugins/mp3/.libs/mp3$(SOEXT) $(top_builddir)/examples/plugins/mp3.tpp
+ 
+ install-exec-am:
+ 
+ clean distclean:
+-	rm -f $(top_srcdir)/examples/plugins/mp3.tpp
++	rm -f $(top_builddir)/examples/plugins/mp3.tpp
+--- origsrc/libtunepimp-0.5.3/plugins/mp4/Makefile.am	2006-11-18 04:51:08.000000000 -0600
++++ src/libtunepimp-0.5.3/plugins/mp4/Makefile.am	2008-06-16 01:08:07.718750000 -0500
+@@ -26,15 +26,15 @@
+ 
+ lib_LTLIBRARIES = mp4.la
+ mp4_la_SOURCES = mp4.cpp
+-mp4_la_LDFLAGS = -module -avoid-version
+-mp4_la_LIBADD = ../../lib/utf8/libutf8.la ../../lib/libpluginsupport.la -lmp4v2 -lmusicbrainz
++mp4_la_LDFLAGS = -module -avoid-version -no-undefined
++mp4_la_LIBADD = ../../lib/libpluginsupport.la ../../lib/libtunepimp.la -lmp4v2 -lmusicbrainz
+ 
+ all:
+-	mkdir -p $(top_srcdir)/examples/plugins
+-	rm -f $(top_srcdir)/examples/plugins/mp4.tpp
+-	ln -s ../../plugins/mp4/.libs/mp4.so $(top_srcdir)/examples/plugins/mp4.tpp
++	mkdir -p $(top_builddir)/examples/plugins
++	rm -f $(top_builddir)/examples/plugins/mp4.tpp
++	ln -s ../../plugins/mp4/.libs/mp4$(SOEXT) $(top_builddir)/examples/plugins/mp4.tpp
+ 
+ install-exec-am:
+ 
+ clean distclean:
+-	rm -f $(top_srcdir)/examples/plugins/mp4.tpp
++	rm -f $(top_builddir)/examples/plugins/mp4.tpp
+--- origsrc/libtunepimp-0.5.3/plugins/mpc/Makefile.am	2006-11-18 04:51:08.000000000 -0600
++++ src/libtunepimp-0.5.3/plugins/mpc/Makefile.am	2008-06-16 01:08:07.812500000 -0500
+@@ -25,25 +25,25 @@
+ INCLUDES = -I$(top_srcdir)/include/tunepimp-0.5 $(INCLTDL) 
+ 
+ lib_LTLIBRARIES = mpc.la
+-mpc_la_LDFLAGS = -module -avoid-version
++mpc_la_LDFLAGS = -module -avoid-version -no-undefined
+ mpc_la_DISTSOURCES = mpc.cpp mpcdecode.cpp
+ 
+ if HAVE_MPCDEC
+ mpc_la_CXXFLAGS = $(TAGLIB_CFLAGS) -DHAVE_MPCDEC
+ mpc_la_SOURCES = mpc.cpp mpcdecode.cpp
+-mpc_la_LIBADD = ../../lib/utf8/libutf8.la ../../lib/libpluginsupport.la $(TAGLIB_LIBS) -lmpcdec -lmusicbrainz
++mpc_la_LIBADD = ../../lib/libpluginsupport.la ../../lib/libtunepimp.la $(TAGLIB_LIBS) -lmpcdec -lmusicbrainz
+ else
+ mpc_la_CXXFLAGS = $(TAGLIB_CFLAGS)
+ mpc_la_SOURCES = mpc.cpp
+-mpc_la_LIBADD = ../../lib/utf8/libutf8.la ../../lib/libpluginsupport.la $(TAGLIB_LIBS) -lmusicbrainz
++mpc_la_LIBADD = ../../lib/libpluginsupport.la ../../lib/libtunepimp.la $(TAGLIB_LIBS) -lmusicbrainz
+ endif
+ 
+ all:
+-	mkdir -p $(top_srcdir)/examples/plugins
+-	rm -f $(top_srcdir)/examples/plugins/mpc.tpp
+-	ln -s ../../plugins/mpc/.libs/mpc.so $(top_srcdir)/examples/plugins/mpc.tpp
++	mkdir -p $(top_builddir)/examples/plugins
++	rm -f $(top_builddir)/examples/plugins/mpc.tpp
++	ln -s ../../plugins/mpc/.libs/mpc$(SOEXT) $(top_builddir)/examples/plugins/mpc.tpp
+ 
+ install-exec-am:
+ 
+ clean distclean:
+-	rm -f $(top_srcdir)/examples/plugins/mpc.tpp
++	rm -f $(top_builddir)/examples/plugins/mpc.tpp
+--- origsrc/libtunepimp-0.5.3/plugins/speex/Makefile.am	2006-11-18 04:51:10.000000000 -0600
++++ src/libtunepimp-0.5.3/plugins/speex/Makefile.am	2008-06-16 01:08:07.812500000 -0500
+@@ -27,15 +27,15 @@
+ lib_LTLIBRARIES = speex.la
+ speex_la_SOURCES = speex.cpp speexfile.cpp speexfile.h speexproperties.cpp speexproperties.h
+ speex_la_CXXFLAGS = $(TAGLIB_CFLAGS)
+-speex_la_LDFLAGS = -module -avoid-version
+-speex_la_LIBADD = ../../lib/utf8/libutf8.la ../../lib/libpluginsupport.la $(TAGLIB_LIBS) -lmusicbrainz
++speex_la_LDFLAGS = -module -avoid-version -no-undefined
++speex_la_LIBADD = ../../lib/libpluginsupport.la ../../lib/libtunepimp.la $(TAGLIB_LIBS) -lmusicbrainz
+ 
+ all:
+-	mkdir -p $(top_srcdir)/examples/plugins
+-	rm -f $(top_srcdir)/examples/plugins/speex.tpp
+-	ln -s ../../plugins/speex/.libs/speex.so $(top_srcdir)/examples/plugins/speex.tpp
++	mkdir -p $(top_builddir)/examples/plugins
++	rm -f $(top_builddir)/examples/plugins/speex.tpp
++	ln -s ../../plugins/speex/.libs/speex$(SOEXT) $(top_builddir)/examples/plugins/speex.tpp
+ 
+ install-exec-am:
+ 
+ clean distclean:
+-	rm -f $(top_srcdir)/examples/plugins/speex.tpp
++	rm -f $(top_builddir)/examples/plugins/speex.tpp
+--- origsrc/libtunepimp-0.5.3/plugins/tta/Makefile.am	2006-11-18 04:51:38.000000000 -0600
++++ src/libtunepimp-0.5.3/plugins/tta/Makefile.am	2008-06-16 01:08:07.828125000 -0500
+@@ -27,15 +27,15 @@
+ lib_LTLIBRARIES = tta.la
+ tta_la_SOURCES = tta.cpp ttafile.cpp ttafile.h ttaproperties.cpp ttaproperties.h
+ tta_la_CXXFLAGS = $(TAGLIB_CFLAGS)
+-tta_la_LDFLAGS = -module -avoid-version
+-tta_la_LIBADD = ../../lib/utf8/libutf8.la ../../lib/libpluginsupport.la $(TAGLIB_LIBS) -lmusicbrainz
++tta_la_LDFLAGS = -module -avoid-version -no-undefined
++tta_la_LIBADD = ../../lib/libpluginsupport.la ../../lib/libtunepimp.la $(TAGLIB_LIBS) -lmusicbrainz
+ 
+ all:
+-	mkdir -p $(top_srcdir)/examples/plugins
+-	rm -f $(top_srcdir)/examples/plugins/tta.tpp
+-	ln -s ../../plugins/tta/.libs/tta.so $(top_srcdir)/examples/plugins/tta.tpp
++	mkdir -p $(top_builddir)/examples/plugins
++	rm -f $(top_builddir)/examples/plugins/tta.tpp
++	ln -s ../../plugins/tta/.libs/tta$(SOEXT) $(top_builddir)/examples/plugins/tta.tpp
+ 
+ install-exec-am:
+ 
+ clean distclean:
+-	rm -f $(top_srcdir)/examples/plugins/tta.tpp
++	rm -f $(top_builddir)/examples/plugins/tta.tpp
+--- origsrc/libtunepimp-0.5.3/plugins/vorbis/Makefile.am	2006-11-18 04:51:20.000000000 -0600
++++ src/libtunepimp-0.5.3/plugins/vorbis/Makefile.am	2008-06-16 01:08:07.890625000 -0500
+@@ -27,17 +27,17 @@
+ 
+ lib_LTLIBRARIES = vorbis.la
+ vorbis_la_SOURCES = vorbis.cpp vorbisdecode.cpp vorbisdecode.h vcedit.c vorbis_meta.cpp i18n.h
+-vorbis_la_LDFLAGS = -module -avoid-version
+-vorbis_la_LIBADD = ../../lib/utf8/libutf8.la ../../lib/libpluginsupport.la -logg -lvorbis -lvorbisfile -lmusicbrainz
++vorbis_la_LDFLAGS = -module -avoid-version -no-undefined
++vorbis_la_LIBADD = ../../lib/libpluginsupport.la ../../lib/libtunepimp.la -logg -lvorbis -lvorbisfile -lmusicbrainz
+ 
+ noinst_HEADERS = vcedit.h vorbis_meta.h
+ 
+ all:
+-	mkdir -p $(top_srcdir)/examples/plugins
+-	rm -f $(top_srcdir)/examples/plugins/vorbis.tpp
+-	ln -s ../../plugins/vorbis/.libs/vorbis.so $(top_srcdir)/examples/plugins/vorbis.tpp
++	mkdir -p $(top_builddir)/examples/plugins
++	rm -f $(top_builddir)/examples/plugins/vorbis.tpp
++	ln -s ../../plugins/vorbis/.libs/vorbis$(SOEXT) $(top_builddir)/examples/plugins/vorbis.tpp
+ 
+ install-exec-am:
+ 
+ clean distclean:
+-	rm -f $(top_srcdir)/examples/plugins/vorbis.tpp
++	rm -f $(top_builddir)/examples/plugins/vorbis.tpp
+--- origsrc/libtunepimp-0.5.3/plugins/wav/Makefile.am	2006-11-28 14:24:03.000000000 -0600
++++ src/libtunepimp-0.5.3/plugins/wav/Makefile.am	2008-06-16 01:08:07.906250000 -0500
+@@ -26,15 +26,15 @@
+ 
+ lib_LTLIBRARIES = wav.la
+ wav_la_SOURCES = wav.cpp wavdecode.cpp wavdecode.h
+-wav_la_LDFLAGS = -module -avoid-version
+-wav_la_LIBADD = ../../lib/utf8/libutf8.la ../../lib/libpluginsupport.la -lmusicbrainz
++wav_la_LDFLAGS = -module -avoid-version -no-undefined
++wav_la_LIBADD = ../../lib/libpluginsupport.la ../../lib/libtunepimp.la -lmusicbrainz
+ 
+ all:
+-	mkdir -p $(top_srcdir)/examples/plugins
+-	rm -f $(top_srcdir)/examples/plugins/wav.tpp
+-	ln -s ../../plugins/wav/.libs/wav.so $(top_srcdir)/examples/plugins/wav.tpp
++	mkdir -p $(top_builddir)/examples/plugins
++	rm -f $(top_builddir)/examples/plugins/wav.tpp
++	ln -s ../../plugins/wav/.libs/wav$(SOEXT) $(top_builddir)/examples/plugins/wav.tpp
+ 
+ install-exec-am:
+ 
+ clean distclean:
+-	rm -f $(top_srcdir)/examples/plugins/wav.tpp
++	rm -f $(top_builddir)/examples/plugins/wav.tpp
+--- origsrc/libtunepimp-0.5.3/plugins/wma/Makefile.am	2006-11-18 04:51:28.000000000 -0600
++++ src/libtunepimp-0.5.3/plugins/wma/Makefile.am	2008-06-16 01:08:07.921875000 -0500
+@@ -28,15 +28,15 @@
+ wma_la_SOURCES = wma.cpp wmaattribute.cpp wmaattribute.h wmafile.cpp wmafile.h \
+ 	wmaproperties.cpp wmaproperties.h wmatag.cpp wmatag.h
+ wma_la_CXXFLAGS = $(TAGLIB_CFLAGS)
+-wma_la_LDFLAGS = -module -avoid-version
+-wma_la_LIBADD = ../../lib/utf8/libutf8.la ../../lib/libpluginsupport.la $(TAGLIB_LIBS) -lmusicbrainz
++wma_la_LDFLAGS = -module -avoid-version -no-undefined
++wma_la_LIBADD = ../../lib/libpluginsupport.la ../../lib/libtunepimp.la $(TAGLIB_LIBS) -lmusicbrainz
+ 
+ all:
+-	mkdir -p $(top_srcdir)/examples/plugins
+-	rm -f $(top_srcdir)/examples/plugins/wma.tpp
+-	ln -s ../../plugins/wma/.libs/wma.so $(top_srcdir)/examples/plugins/wma.tpp
++	mkdir -p $(top_builddir)/examples/plugins
++	rm -f $(top_builddir)/examples/plugins/wma.tpp
++	ln -s ../../plugins/wma/.libs/wma$(SOEXT) $(top_builddir)/examples/plugins/wma.tpp
+ 
+ install-exec-am:
+ 
+ clean distclean:
+-	rm -f $(top_srcdir)/examples/plugins/wma.tpp
++	rm -f $(top_builddir)/examples/plugins/wma.tpp
+--- origsrc/libtunepimp-0.5.3/plugins/wv/Makefile.am	2006-11-18 04:51:41.000000000 -0600
++++ src/libtunepimp-0.5.3/plugins/wv/Makefile.am	2008-06-16 01:08:07.921875000 -0500
+@@ -27,15 +27,15 @@
+ lib_LTLIBRARIES = wv.la
+ wv_la_SOURCES = wv.cpp wvfile.cpp wvfile.h wvproperties.cpp wvproperties.h
+ wv_la_CXXFLAGS = $(TAGLIB_CFLAGS)
+-wv_la_LDFLAGS = -module -avoid-version
+-wv_la_LIBADD = ../../lib/utf8/libutf8.la ../../lib/libpluginsupport.la $(TAGLIB_LIBS) -lmusicbrainz
++wv_la_LDFLAGS = -module -avoid-version -no-undefined
++wv_la_LIBADD = ../../lib/libpluginsupport.la ../../lib/libtunepimp.la $(TAGLIB_LIBS) -lmusicbrainz
+ 
+ all:
+-	mkdir -p $(top_srcdir)/examples/plugins
+-	rm -f $(top_srcdir)/examples/plugins/wv.tpp
+-	ln -s ../../plugins/wv/.libs/wv.so $(top_srcdir)/examples/plugins/wv.tpp
++	mkdir -p $(top_builddir)/examples/plugins
++	rm -f $(top_builddir)/examples/plugins/wv.tpp
++	ln -s ../../plugins/wv/.libs/wv$(SOEXT) $(top_builddir)/examples/plugins/wv.tpp
+ 
+ install-exec-am:
+ 
+ clean distclean:
+-	rm -f $(top_srcdir)/examples/plugins/wv.tpp
++	rm -f $(top_builddir)/examples/plugins/wv.tpp
