@@ -1,0 +1,11 @@
+--- origsrc/libtunepimp-0.5.3/python/tunepimp/tunepimp.py	2006-11-18 04:51:51.000000000 -0600
++++ src/libtunepimp-0.5.3/python/tunepimp/tunepimp.py	2011-01-25 00:55:45.974343700 -0600
+@@ -163,6 +163,8 @@ def _openLibrary(libName, version):
+         fullName = 'lib%s.so.%s' % (libName, version)
+     elif sys.platform == 'darwin':
+         fullName = 'lib%s.%s.dylib' % (libName, version)
++    elif sys.platform == 'cygwin':
++        fullName = 'cyg%s-%s.dll' % (libName, version)
+     elif sys.platform == 'win32':
+         fullName = 'lib%s.dll' % (libName,)
+     else:

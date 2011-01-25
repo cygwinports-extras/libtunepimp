@@ -1,3 +1,5 @@
+inherit distutils
+
 DESCRIPTION="MusicBrainz tagging library"
 HOMEPAGE="http://musicbrainz.org/doc/tunepimp/"
 SRC_URI="http://ftp.musicbrainz.org/pub/musicbrainz/${P}.tar.gz"
@@ -8,22 +10,36 @@ PATCH_URI="
 	mirror://portage/media-libs/${PN#lib}/files/${P#lib}-gcc44.patch
 	mirror://portage/media-libs/${PN#lib}/files/${P#lib}-new_libmp4v2.patch
 	0.5.3-vpath-no-undefined.patch
+	0.5.3-python-ctypes.patch
 "
 
-PKG_NAMES="${PN} ${PN}5 ${PN}-devel"
-PKG_HINTS="setup runtime devel"
+PKG_NAMES="${PN} ${PN}5 ${PN}-devel python-tunepimp"
+PKG_HINTS="setup runtime devel python"
 libtunepimp_CONTENTS='usr/bin/*.exe usr/share/'
 libtunepimp5_CONTENTS="usr/bin/*-5.dll usr/lib/tunepimp/"
 libtunepimp_devel_CONTENTS='usr/include/ usr/lib/lib*'
+python_tunepimp_CONTENTS=${PYTHON_SITELIB#/}
 
 DIFF_EXCLUDES="Makefile.PL libltdl"
 
-CYGCONF_ARGS="--disable-static"
-MAKEOPTS+=" -j1"
+src_compile() {
+	cd ${S}
+	cygautoreconf
+	cd ${B}
+	cygconf --disable-static
+	cygmake -j1
+
+	cd ${B}/python
+	lndirs ${S}/python ${B}/python
+	distutils_compile
+}
 
 src_install() {
 	cd ${B}
 	cyginstall
+
+	cd ${B}/python
+	distutils_install
 
 	chmod 0755 ${D}/usr/lib/tunepimp/plugins/*.tpp
 	strip ${D}/usr/lib/tunepimp/plugins/*.tpp
