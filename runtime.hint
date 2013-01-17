@@ -1,6 +1,0 @@
-category: Audio
-requires: libcurl4 libexpat1 libFLAC8 libgcc1 libiconv2 libltdl7 libmad0 libofa0 libogg0 libstdc++6 libtag1 libvorbis0 libvorbisfile3 zlib0
-external-source: libtunepimp
-sdesc: "MusicBrainz tagging library (runtime)"
-ldesc: "The TunePimp library is a development library geared towards
-developers who wish to create MusicBrainz enabled tagging applications."

@@ -1,6 +1,12 @@
 inherit distutils
 
-DESCRIPTION="MusicBrainz tagging library"
+NAME="libtunepimp"
+VERSION=0.5.3
+RELEASE=5
+CATEGORY="Audio"
+SUMMARY="MusicBrainz tagging library"
+DESCRIPTION="The TunePimp library is a development library geared towards
+developers who wish to create MusicBrainz enabled tagging applications."
 HOMEPAGE="http://musicbrainz.org/doc/tunepimp/"
 SRC_URI="http://ftp.musicbrainz.org/pub/musicbrainz/${P}.tar.gz"
 PATCH_URI="
@@ -9,15 +15,18 @@ PATCH_URI="
 	mirror://portage/media-libs/${PN#lib}/files/${P#lib}-build-fix.patch
 	mirror://portage/media-libs/${PN#lib}/files/${P#lib}-gcc44.patch
 	mirror://portage/media-libs/${PN#lib}/files/${P#lib}-new_libmp4v2.patch
+	mirror://portage/media-libs/${PN#lib}/files/${P#lib}-curl-headers.patch
 	0.5.3-vpath-no-undefined.patch
 	0.5.3-python-ctypes.patch
 "
 
 PKG_NAMES="${PN} ${PN}5 ${PN}-devel python-tunepimp"
-PKG_HINTS="setup runtime devel python"
 libtunepimp_CONTENTS='usr/bin/*.exe usr/share/'
 libtunepimp5_CONTENTS="usr/bin/*-5.dll usr/lib/tunepimp/"
 libtunepimp_devel_CONTENTS='usr/include/ usr/lib/lib*'
+python_tunepimp_CATEGORY="Python"
+python_tunepimp_SUMMARY="${SUMMARY} (Python bindings)"
+python_tunepimp_REQUIRES="libtunepimp5"  # ctypes
 python_tunepimp_CONTENTS=${PYTHON_SITELIB#/}
 
 DIFF_EXCLUDES="Makefile.PL libltdl"
@@ -42,5 +51,6 @@ src_install() {
 	distutils_install
 
 	chmod 0755 ${D}/usr/lib/tunepimp/plugins/*.tpp
-	strip ${D}/usr/lib/tunepimp/plugins/*.tpp
 }
+
+KEEP_LA_FILES="none"
